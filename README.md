@@ -6,20 +6,25 @@ A responsive, installable web app for managing private university timetables. It
 
 Serve this folder from any static web server, then open its URL in a browser. A server is needed for PWA installation and offline caching; the app itself is plain HTML, CSS, and JavaScript.
 
-## Included in Version 1
+## Included
 
 - Dashboard with today’s schedule, next class, exam countdown, deadlines, and weekly overview
 - Day, week, and month calendar views
 - Add, edit, and delete events, including notes and recurrence (weekly, every two weeks, monthly)
-- CSV and iCalendar (`.ics`) timetable import with a preview, merge/replace mode, duplicate warnings, and row selection
+- CSV and iCalendar (`.ics`) timetable import with a comparison preview for new, changed, unchanged, and missing classes; missing entries are kept unless removal is explicitly selected
 - JSON backup download and restore, plus `.ics` export for common calendar apps
 - Email-and-password sign-in and account creation, backed by Supabase Auth
 - Private per-account calendar sync, protected by PostgreSQL row-level security
 - Event types and colors for lectures, exams, assignments, university events, holidays, and deadlines
 - Local browser storage and a service worker for app-shell offline access
 - Responsive layout and PWA manifest
+- Search and event-type filtering across the calendar
+- Series-level and single-occurrence editing/deletion for repeating events
+- Study planner with task completion and one-click study-session plans
+- Twelve-week workload overview, tight travel-gap notices, and account-specific preferences
+- Optional browser reminders while the app is open
 
-The first Wismar account includes the meetings from `Intercultural Practice Project-Schedule.csv`. A Worms account starts with its own empty schedule. Each person creates a separate account and chooses their university; calendars are private and never shared between accounts. Email addresses are the sign-in names. The app does not create accounts or store passwords itself.
+Each account starts with its own private calendar. Each person creates a separate account and chooses their university; calendars are private and never shared between accounts. Email addresses are the sign-in names. The app does not create accounts or store passwords itself.
 
 ### Connect Supabase for online accounts
 
@@ -34,7 +39,7 @@ The app-side auth flow is ready, but online accounts need a Supabase project. Un
 
 After sign-in, the app keeps a local per-account cache for offline viewing and syncs calendar changes to that account's private cloud row when online. It does not provide a password reset email template or cross-account sharing yet. Email/password login is provided by Supabase Auth; database access is restricted by `auth.uid()` policies.
 
-Choose **Calendar → Import timetable** to preview a CSV or `.ics` schedule. Imports always add to the existing calendar and never remove classes. Likely duplicates are marked and unchecked by default; you can select them if you do want another copy. You can exclude individual rows before applying. CSV accepts comma- or semicolon-delimited files with `Date`, `Beginning`/`Start`, and `End` columns. iCalendar imports include event titles, dates, times, locations, lecturers in parentheses, descriptions, and supported weekly recurrence rules with exclusions. Use **Export / backup** to download a restorable JSON backup or an `.ics` calendar file. Restoring a JSON backup replaces the events currently saved for the signed-in account.
+Choose **Calendar → Import timetable** to compare a CSV or `.ics` schedule. New and changed classes are selected by default. Missing classes from that imported file are listed and kept unless you explicitly choose to remove them; unrelated hand-entered events and other import types are never removed. CSV accepts comma- or semicolon-delimited files with `Date`, `Beginning`/`Start`, and `End` columns. iCalendar imports include event titles, dates, times, locations, lecturers in parentheses, descriptions, and supported weekly recurrence rules with exclusions. Use **Export / backup** to download a restorable JSON backup or an `.ics` calendar file. Restoring a JSON backup replaces the events currently saved for the signed-in account. Notification reminders appear while the web app is open; browser background push is not configured.
 
 ## Data architecture
 
