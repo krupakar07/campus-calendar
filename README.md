@@ -1,0 +1,41 @@
+# Campus — Hochschule Wismar calendar
+
+A responsive, installable web app for managing private university timetables. It supports separate accounts for Hochschule Wismar and Hochschule Worms, with each account's schedule isolated from the other.
+
+## Run locally
+
+Serve this folder from any static web server, then open its URL in a browser. A server is needed for PWA installation and offline caching; the app itself is plain HTML, CSS, and JavaScript.
+
+## Included in Version 1
+
+- Dashboard with today’s schedule, next class, exam countdown, deadlines, and weekly overview
+- Day, week, and month calendar views
+- Add, edit, and delete events, including notes and recurrence (weekly, every two weeks, monthly)
+- CSV and iCalendar (`.ics`) timetable import with a preview, merge/replace mode, duplicate warnings, and row selection
+- JSON backup download and restore, plus `.ics` export for common calendar apps
+- Email-and-password sign-in and account creation, backed by Supabase Auth
+- Private per-account calendar sync, protected by PostgreSQL row-level security
+- Event types and colors for lectures, exams, assignments, university events, holidays, and deadlines
+- Local browser storage and a service worker for app-shell offline access
+- Responsive layout and PWA manifest
+
+The first Wismar account includes the meetings from `Intercultural Practice Project-Schedule.csv`. A Worms account starts with its own empty schedule. Each person creates a separate account and chooses their university; calendars are private and never shared between accounts. Email addresses are the sign-in names. The app does not create accounts or store passwords itself.
+
+### Connect Supabase for online accounts
+
+The app-side auth flow is ready, but online accounts need a Supabase project. Until configured, the sign-in screen explains what is missing.
+
+1. Create a Supabase project and open its SQL Editor.
+2. Run [`supabase-schema.sql`](supabase-schema.sql) to create the private calendar table and owner-only row-level security policies.
+3. In Supabase project settings, enable email/password sign-in. Email confirmation may be enabled; if so, each person confirms their email before signing in.
+4. Copy the project URL and the public publishable/anon key into [`supabase-config.js`](supabase-config.js). Never use a `service_role` or secret key in this browser app.
+5. In Supabase Auth URL Configuration, set the deployed app URL as the Site URL and add it to the redirect allow list. Serve this folder over HTTPS (localhost is also supported for development).
+6. Both people open the same hosted app, create their own account, and select Hochschule Wismar or Hochschule Worms.
+
+After sign-in, the app keeps a local per-account cache for offline viewing and syncs calendar changes to that account's private cloud row when online. It does not provide a password reset email template or cross-account sharing yet. Email/password login is provided by Supabase Auth; database access is restricted by `auth.uid()` policies.
+
+Choose **Calendar → Import timetable** to preview a CSV or `.ics` schedule. Imports always add to the existing calendar and never remove classes. Likely duplicates are marked and unchecked by default; you can select them if you do want another copy. You can exclude individual rows before applying. CSV accepts comma- or semicolon-delimited files with `Date`, `Beginning`/`Start`, and `End` columns. iCalendar imports include event titles, dates, times, locations, lecturers in parentheses, descriptions, and supported weekly recurrence rules with exclusions. Use **Export / backup** to download a restorable JSON backup or an `.ics` calendar file. Restoring a JSON backup replaces the events currently saved for the signed-in account.
+
+## Data architecture
+
+Events use a plain JSON shape. Local caches are namespaced by authenticated user ID; the Supabase `campus_calendars` row is also keyed by that ID and protected with row-level security. The calendar UI and CSV importer operate on the active account's event list, so adding another institution or an import format does not require changing the authentication boundary.
