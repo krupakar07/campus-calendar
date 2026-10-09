@@ -1,6 +1,0 @@
-services:
-  - type: web
-    name: campus-calendar
-    runtime: static
-    buildCommand: ""
-    staticPublishPath: .
